@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from browser_agent import search_web
+from browser_service import search_web
 from gemini_service import generate_summary
 
 app = Flask(__name__)
@@ -8,7 +8,7 @@ CORS(app)
 
 @app.route("/")
 def home():
-    return "AI Browser Agent Backend Running"
+    return "Devta hu mai"
 
 @app.route("/api/task", methods=["POST"])
 def handle_task():
