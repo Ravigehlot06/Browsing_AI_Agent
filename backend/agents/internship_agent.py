@@ -18,13 +18,13 @@ def run_internship_agent(user_data):
     top_results = ranked_results[:5]
 
     # Step 5: Create summary prompt for Gemini
-    summary_prompt = f"""
-    Based on these internship opportunities:
+    summary_prompt = f"""Top internship titles:
 
-    {top_results}
+        {[item['title'] for item in top_results]}
 
-    Write a short professional career recommendation summary
-    for the student based on their preferences.
+        Write a short 4-line professional recommendation summary
+        for the student.
+        Keep it concise and fast.
     """
 
     ai_summary = ask_gemini(summary_prompt)

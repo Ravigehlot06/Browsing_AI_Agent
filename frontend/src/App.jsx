@@ -9,12 +9,18 @@ function App() {
   const [history, setHistory] = useState([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const [task, setTask] = useState('');
+  const [branch, setBranch] = useState('');
+  const [domain, setDomain] = useState('');
+  const [location, setLocation] = useState('');
+  const [workMode, setWorkMode] = useState('');
+  const [stipend, setStipend] = useState('');
+  const [duration, setDuration] = useState('');
+  const [priority, setPriority] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // 0: idle, 1: searching, 2: opening, 3: extracting, 4: summary, 5: done, 6: error
-  const [currentStep, setCurrentStep] = useState(0); 
-  
+  const [currentStep, setCurrentStep] = useState(0);
+
   const [results, setResults] = useState([]);
   const [summary, setSummary] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -37,23 +43,23 @@ function App() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!task.trim()) return;
-    
+    if (!branch.trim() || !domain.trim()) return;
+
     setIsSubmitting(true);
-    setCurrentStep(1); 
+    setCurrentStep(1);
     setErrorMessage('');
     setResults([]);
     setSummary('');
 
     try {
       const response = await axios.post('http://127.0.0.1:5000/api/internship-agent', {
-        branch: "General",
-        domains: [task],
-        locations: ["Remote"],
-        work_mode: "Any",
-        minimum_stipend: "Any",
-        duration: "Flexible",
-        priorities: []
+        branch: branch,
+        domains: [domain],
+        locations: [location],
+        work_mode: workMode,
+        minimum_stipend: stipend,
+        duration: duration,
+        priorities: [priority]
       });
 
       if (response.data.success) {
@@ -61,17 +67,17 @@ function App() {
         const newSummary = response.data.data.ai_summary || '';
         setResults(newResults);
         setSummary(newSummary);
-        setCurrentStep(5); 
+        setCurrentStep(5);
 
         // Add to history
         setHistory(prev => [{
           id: Date.now(),
-          task,
+          task: `${branch} - ${domain} - ${location}`,
           results: newResults,
           summary: newSummary,
           date: new Date().toLocaleTimeString()
         }, ...prev]);
-        
+
       } else {
         setErrorMessage("Server not responding");
         setCurrentStep(6);
@@ -86,16 +92,21 @@ function App() {
   };
 
   const reset = () => {
-    setTask('');
+    setBranch('');
+    setDomain('');
+    setLocation('');
+    setWorkMode('');
+    setStipend('');
+    setDuration('');
+    setPriority('');
     setCurrentStep(0);
     setResults([]);
     setSummary('');
     setErrorMessage('');
     setActiveTab('home');
-  }
+  };
 
   const loadHistoryItem = (item) => {
-    setTask(item.task);
     setResults(item.results);
     setSummary(item.summary);
     setCurrentStep(5);
@@ -117,7 +128,7 @@ function App() {
           <Bot className="nav-logo" size={28} />
           <span className="nav-title">Agentic AI</span>
         </div>
-        
+
         <div className="nav-center desktop-only">
           <button className={`nav-link ${activeTab === 'home' ? 'active' : ''}`} onClick={() => setActiveTab('home')}>
             <Home size={18} /> Home
@@ -151,7 +162,7 @@ function App() {
 
       {/* Main Content Area */}
       <main className="main-content">
-        
+
         {activeTab === 'history' ? (
           <div className="history-panel fade-in">
             <h2>Task History</h2>
@@ -185,12 +196,53 @@ function App() {
                   <Sparkles className="input-icon" size={20} />
                   <input
                     type="text"
-                    placeholder="Enter your task..."
-                    value={task}
-                    onChange={(e) => setTask(e.target.value)}
-                    autoFocus
+                    placeholder="Branch (CSE, IT, ECE)"
+                    value={branch}
+                    onChange={(e) => setBranch(e.target.value)}
                   />
-                  <button type="submit" className="submit-btn" disabled={!task.trim() || isSubmitting}>
+
+                  <input
+                    type="text"
+                    placeholder="Preferred Domain (AI/ML, Backend)"
+                    value={domain}
+                    onChange={(e) => setDomain(e.target.value)}
+                  />
+
+                  <input
+                    type="text"
+                    placeholder="Preferred Location"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                  />
+
+                  <input
+                    type="text"
+                    placeholder="Work Mode (Remote / Hybrid / Onsite)"
+                    value={workMode}
+                    onChange={(e) => setWorkMode(e.target.value)}
+                  />
+
+                  <input
+                    type="text"
+                    placeholder="Minimum Stipend"
+                    value={stipend}
+                    onChange={(e) => setStipend(e.target.value)}
+                  />
+
+                  <input
+                    type="text"
+                    placeholder="Duration"
+                    value={duration}
+                    onChange={(e) => setDuration(e.target.value)}
+                  />
+
+                  <input
+                    type="text"
+                    placeholder="Top Priority"
+                    value={priority}
+                    onChange={(e) => setPriority(e.target.value)}
+                  />
+                  <button type="submit" className="submit-btn" disabled={!branch.trim() || !domain.trim() || isSubmitting}>
                     {isSubmitting ? (
                       <><Loader2 className="spinning-icon" size={18} /> Processing...</>
                     ) : (
@@ -205,7 +257,9 @@ function App() {
               <div className="agent-workflow">
                 <div className="task-header">
                   <h3>Task execution:</h3>
-                  <p className="task-query">"{task}"</p>
+                  <p className="task-query">
+                    "{branch} - {domain} - {location}"
+                  </p>
                 </div>
 
                 {currentStep === 6 && (
@@ -268,10 +322,10 @@ function App() {
                     <h3 className="section-title">Results</h3>
                     <div className="results-grid">
                       {results.map((res, i) => {
-                        const title = res.title || (typeof res === 'string' ? res : "Result " + (i+1));
+                        const title = res.title || (typeof res === 'string' ? res : "Result " + (i + 1));
                         const company = res.company || "Unknown Company";
                         const itemSummary = res.source ? `Data extracted from ${res.source}` : "Key information extracted.";
-                        
+
                         return (
                           <div key={i} className="result-card">
                             <div className="card-header">
@@ -291,7 +345,7 @@ function App() {
                     <h3 className="section-title">Final Summary</h3>
                     <div className="summary-card">
                       <p className="clean-paragraph">
-                        {summary.split('**').map((chunk, index) => 
+                        {summary.split('**').map((chunk, index) =>
                           index % 2 === 1 ? <strong key={index} className="highlighted-text">{chunk}</strong> : chunk
                         )}
                       </p>
