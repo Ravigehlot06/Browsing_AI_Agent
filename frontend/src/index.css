@@ -1,0 +1,6 @@
+/* Minimal reset, all styles in App.css */
+body {
+  margin: 0;
+  padding: 0;
+  background: #050505;
+}
