@@ -353,6 +353,7 @@ function App() {
                   </div>
                 )}
 
+
                 {(currentStep === 5 || currentStep === 6) && (
                   <button className="reset-btn fade-in" onClick={reset}>
                     New Task
